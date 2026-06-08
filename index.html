@@ -84,6 +84,10 @@ body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:#0f172a;min-
 <div class="footer">© 2024 Wisata Kudus</div>
 
 <script>
+// ============================================
+// KODE INI DIPERBARUI UNTUK MENGATASI LOADING TERUS
+// ============================================
+
 const messages = [
   "Memuat...",
   "Menyiapkan koneksi...",
@@ -106,14 +110,21 @@ const params = new URLSearchParams(window.location.search);
 const role = params.get("role");
 const nama = params.get("nama");
 
+// Simpan sesi jika ada
 if (role && nama) {
-  // Simpan sesi ke sessionStorage
   sessionStorage.setItem("wk_user", JSON.stringify({
     id: null,
     nama: decodeURIComponent(nama),
     role: role
   }));
 }
+
+// ============================================
+// PERBAIKAN UTAMA: Redirect ke URL lengkap
+// ============================================
+
+// Tentukan BASE URL (hardcoded atau dari query param)
+const BASE_URL = "https://admin-wisatakudus.netlify.app";
 
 // Redirect setelah animasi loading selesai (2.5 detik)
 setTimeout(() => {
@@ -124,17 +135,24 @@ setTimeout(() => {
 
   if (savedSes) {
     const user = JSON.parse(savedSes);
+    
+    // Redirect ke URL lengkap dengan path yang sesuai
     if (user.role === "admin") {
-      window.location.href = "/admin/";
+      // Redirect ke halaman admin dengan parameter
+      window.location.href = BASE_URL + "/admin/?role=admin&nama=" + encodeURIComponent(user.nama);
     } else if (user.role === "mitra") {
-      window.location.href = "/mitra/";
+      // Redirect ke halaman mitra dengan parameter
+      window.location.href = BASE_URL + "/mitra/?role=mitra&nama=" + encodeURIComponent(user.nama);
     } else {
-      // guest atau tidak dikenal, tetap di loading (tidak redirect)
+      // Guest atau tidak dikenal
       textEl.textContent = "Akses tidak diizinkan";
     }
   } else {
-    // Tidak ada sesi sama sekali
+    // Tidak ada sesi - kembali ke login
     textEl.textContent = "Silakan login melalui aplikasi";
+    
+    // Opsional: Redirect ke halaman login jika ingin
+    // window.location.href = BASE_URL + "/login/";
   }
 }, 2500);
 </script>
