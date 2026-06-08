@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard Mitra — Wisata Kudus</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<style>
+:root{--primary:#0d9488;--primary-dark:#0f766e;--danger:#ef4444;--success:#10b981;--warning:#f59e0b;--dark:#1e293b;--white:#fff;--gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;--gray-300:#d1d5db;--gray-400:#9ca3af;--gray-500:#6b7280;--gray-700:#374151;--radius:12px;--radius-sm:8px;--transition:all 0.3s ease;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:var(--gray-100);color:var(--dark);line-height:1.6;}
+.app{display:flex;min-height:100vh;}
+.sidebar{width:250px;background:var(--primary-dark);color:white;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:1000;transition:transform 0.3s;}
+.logo{padding:20px;display:flex;align-items:center;gap:10px;font-size:1.1rem;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.15);}
+.logo i{font-size:1.4rem;color:#fbbf24;}
+.user-info{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.1);}
+.user-info .avatar{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;margin-bottom:8px;}
+.user-info .name{font-size:0.9rem;font-weight:600;}
+.user-info .role-badge{font-size:0.72rem;background:rgba(255,255,255,0.2);padding:2px 10px;border-radius:50px;display:inline-block;margin-top:4px;}
+.nav-menu{flex:1;padding:12px;display:flex;flex-direction:column;gap:4px;}
+.menu{display:flex;align-items:center;gap:10px;padding:11px 14px;background:transparent;border:none;color:rgba(255,255,255,0.8);border-radius:var(--radius-sm);cursor:pointer;font-size:0.9rem;transition:var(--transition);width:100%;text-align:left;font-family:inherit;}
+.menu:hover{background:rgba(255,255,255,0.12);color:white;}
+.menu.active{background:rgba(255,255,255,0.2);color:white;font-weight:600;}
+.menu i{font-size:1.1rem;}
+.btn-logout{margin:12px;padding:11px 14px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;border-radius:var(--radius-sm);cursor:pointer;font-size:0.9rem;font-family:inherit;display:flex;align-items:center;gap:8px;transition:var(--transition);}
+.btn-logout:hover{background:rgba(239,68,68,0.25);}
+.mobile-header{display:none;align-items:center;gap:12px;padding:14px 16px;background:var(--primary-dark);color:white;position:fixed;top:0;left:0;right:0;z-index:999;}
+.hamburger{background:transparent;border:none;color:white;font-size:1.4rem;cursor:pointer;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:998;}
+.content{flex:1;margin-left:250px;padding:24px;}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+.topbar h1{font-size:1.5rem;font-weight:700;}
+.tab-section{display:none;}
+.tab-section.active{display:block;}
+.card{background:white;border-radius:var(--radius);padding:24px;margin-bottom:20px;border:1px solid var(--gray-200);}
+.card-title{display:flex;align-items:center;gap:8px;font-size:1rem;font-weight:700;color:var(--dark);margin-bottom:20px;}
+.card-title i{color:var(--primary);}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+.stat-card{background:white;border-radius:var(--radius);padding:20px;border:1px solid var(--gray-200);text-align:center;}
+.stat-card .num{font-size:2rem;font-weight:700;color:var(--primary);}
+.stat-card .label{font-size:0.82rem;color:var(--gray-500);margin-top:4px;}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group.full{grid-column:1/-1;}
+label{font-weight:600;font-size:0.82rem;color:var(--gray-700);}
+input,select,textarea{width:100%;padding:10px 14px;border:1.5px solid var(--gray-300);border-radius:var(--radius-sm);font-size:0.88rem;font-family:inherit;outline:none;transition:var(--transition);color:var(--dark);background:white;}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(13,148,136,0.1);}
+textarea{resize:vertical;min-height:80px;}
+.maps-box{display:flex;gap:8px;}
+.maps-box input{flex:1;}
+.img-grid{display:grid;grid-template-columns:1fr 160px;gap:16px;align-items:start;}
+.img-preview{border:1.5px dashed var(--gray-300);border-radius:var(--radius-sm);aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;color:var(--gray-400);flex-direction:column;gap:6px;font-size:0.78rem;overflow:hidden;}
+.img-preview img{width:100%;height:100%;object-fit:cover;}
+.img-preview i{font-size:1.8rem;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border:1.5px solid transparent;border-radius:var(--radius-sm);font-size:0.88rem;font-weight:600;cursor:pointer;transition:var(--transition);white-space:nowrap;font-family:inherit;}
+.btn:hover{transform:translateY(-1px);}
+.btn.primary{background:var(--primary);color:white;border-color:var(--primary);}
+.btn.primary:hover{background:var(--primary-dark);}
+.btn.secondary{background:white;color:var(--gray-700);border-color:var(--gray-300);}
+.btn.secondary:hover{background:var(--gray-50);}
+.btn.danger{background:var(--danger);color:white;}
+.btn.sm{padding:6px 12px;font-size:0.8rem;}
+.btn-row{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
+.alert{padding:11px 16px;border-radius:var(--radius-sm);font-size:0.85rem;font-weight:500;margin-bottom:16px;display:none;align-items:center;gap:8px;}
+.alert.show{display:flex;}
+.alert-error{background:#fef2f2;color:var(--danger);border:1px solid #fecaca;}
+.alert-success{background:#f0fdf4;color:var(--success);border:1px solid #bbf7d0;}
+.alert-info{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;}
+.table-wrap{overflow-x:auto;border:1px solid var(--gray-200);border-radius:var(--radius-sm);}
+table{width:100%;border-collapse:collapse;min-width:600px;}
+th{text-align:left;padding:11px 14px;background:var(--gray-50);font-weight:700;font-size:0.76rem;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.5px;border-bottom:1.5px solid var(--gray-200);}
+td{padding:11px 14px;border-bottom:1px solid var(--gray-100);font-size:0.85rem;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+.tbl-img{width:56px;height:42px;border-radius:6px;object-fit:cover;background:var(--gray-100);}
+.badge{padding:3px 10px;border-radius:50px;font-size:0.76rem;font-weight:600;display:inline-block;}
+.badge-pending{background:#fef3c7;color:#92400e;}
+.badge-approved{background:#d1fae5;color:#065f46;}
+.badge-rejected{background:#fee2e2;color:#991b1b;}
+.badge-alam{background:#d1fae5;color:#065f46;}
+.badge-religi{background:#fef3c7;color:#92400e;}
+.badge-kuliner{background:#fee2e2;color:#991b1b;}
+.badge-edukasi{background:#dbeafe;color:#1e40af;}
+.badge-oleholeh{background:#fce7f3;color:#831843;}
+.empty-row td{text-align:center;padding:3rem;color:var(--gray-400);}
+.empty-row i{font-size:2rem;display:block;margin-bottom:8px;}
+.info-box{background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--radius-sm);padding:12px 16px;font-size:0.85rem;color:#1d4ed8;display:flex;align-items:flex-start;gap:8px;margin-bottom:20px;}
+.info-box i{font-size:1.1rem;margin-top:2px;flex-shrink:0;}
+@media(max-width:1024px){
+  .content{margin-left:0;padding:70px 16px 16px;}
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .mobile-header{display:flex;}
+  .topbar{display:none;}
+  .grid-2,.stats-grid{grid-template-columns:1fr;}
+  .maps-box{flex-direction:column;}
+  .img-grid{grid-template-columns:1fr;}
+}
+</style>
+<script>
+// AUTO SESSION
+(function(){
+const p=new URLSearchParams(window.location.search);
+const r=p.get("role"),n=p.get("nama");
+if(r&&n){sessionStorage.setItem("wk_user",JSON.stringify({id:null,nama:decodeURIComponent(n),role:r}));window.history.replaceState({},"",window.location.pathname);}
+})();
+</script>
+</head>
+<body>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<div class="mobile-header">
+  <button class="hamburger" onclick="toggleSidebar()"><i class="ti ti-menu-2"></i></button>
+  <span style="font-weight:700;">Dashboard Mitra</span>
+</div>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="logo"><i class="ti ti-map-pin"></i> Wisata Kudus</div>
+    <div class="user-info">
+      <div class="avatar" id="avatar-initial">M</div>
+      <div class="name" id="user-name">Mitra</div>
+      <span class="role-badge">Mitra</span>
+    </div>
+    <nav class="nav-menu">
+      <button class="menu active" onclick="showTab('submit',this)"><i class="ti ti-plus-circle"></i> Submit Wisata</button>
+      <button class="menu" onclick="showTab('riwayat',this)"><i class="ti ti-history"></i> Riwayat Submission</button>
+    </nav>
+    <button class="btn-logout" onclick="doLogout()"><i class="ti ti-logout"></i> Keluar</button>
+  </aside>
+
+  <main class="content">
+    <div class="topbar">
+      <h1>Dashboard Mitra</h1>
+    </div>
+
+    <!-- TAB: SUBMIT -->
+    <section class="tab-section active" id="tab-submit">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="num" id="stat-total">0</div><div class="label">Total Submission</div></div>
+        <div class="stat-card"><div class="num" id="stat-pending" style="color:var(--warning);">0</div><div class="label">Menunggu Review</div></div>
+        <div class="stat-card"><div class="num" id="stat-approved" style="color:var(--success);">0</div><div class="label">Disetujui</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" id="form-title"><i class="ti ti-map-pin"></i> Submit Wisata Baru</div>
+        <div class="info-box"><i class="ti ti-info-circle"></i> Data yang Anda submit akan direview oleh admin sebelum ditampilkan ke publik.</div>
+        <div class="alert" id="alert-form"></div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Nama Wisata *</label>
+            <input type="text" id="f-nama" placeholder="Nama tempat wisata"/>
+          </div>
+          <div class="form-group">
+            <label>Kategori *</label>
+            <select id="f-kategori" onchange="autoCategory()">
+              <option value="">Pilih Kategori</option>
+              <option value="alam">Wisata Alam</option>
+              <option value="religi">Wisata Religi</option>
+              <option value="kuliner">Wisata Kuliner</option>
+              <option value="edukasi">Wisata Edukasi</option>
+              <option value="oleholeh">Oleh-oleh</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Jam Buka</label>
+            <input type="text" id="f-jam-buka" placeholder="08:00 - 17:00 WIB"/>
+          </div>
+          <div class="form-group">
+            <label>Harga Tiket</label>
+            <input type="text" id="f-harga-tiket" placeholder="Gratis / Rp 5.000"/>
+          </div>
+          <div class="form-group">
+            <label>Lokasi / Area</label>
+            <input type="text" id="f-lokasi" placeholder="Desa Colo, Kec. Dawe"/>
+          </div>
+          <div class="form-group full">
+            <label>Deskripsi Singkat</label>
+            <textarea id="f-singkat" rows="2" placeholder="Ringkasan singkat..."></textarea>
+          </div>
+          <div class="form-group full">
+            <label>Deskripsi Lengkap *</label>
+            <textarea id="f-deskripsi" rows="4" placeholder="Deskripsi lengkap, fasilitas, sejarah..."></textarea>
+          </div>
+          <div class="form-group full">
+            <label>Google Maps URL</label>
+            <div class="maps-box">
+              <input type="text" id="f-maps" placeholder="Tempel link Google Maps..."/>
+              <button class="btn secondary" onclick="detectMaps()"><i class="ti ti-search"></i> Deteksi</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Latitude</label>
+            <input type="number" id="f-lat" step="any" placeholder="-6.8045"/>
+          </div>
+          <div class="form-group">
+            <label>Longitude</label>
+            <input type="number" id="f-lng" step="any" placeholder="110.8325"/>
+          </div>
+          <div class="form-group full">
+            <label>Alamat Lengkap</label>
+            <input type="text" id="f-alamat" placeholder="Terisi otomatis setelah deteksi maps"/>
+          </div>
+          <div class="form-group full">
+            <label>URL Gambar</label>
+            <div class="img-grid">
+              <input type="text" id="f-gambar" placeholder="https://..." oninput="updatePreview(this.value)"/>
+              <div class="img-preview" id="preview">
+                <i class="ti ti-photo"></i><span>Preview</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" onclick="submitWisata()"><i class="ti ti-send"></i> Submit untuk Review</button>
+          <button class="btn secondary" onclick="resetForm()"><i class="ti ti-refresh"></i> Reset</button>
+          <button class="btn danger sm" id="btn-cancel" style="display:none;" onclick="cancelEdit()"><i class="ti ti-x"></i> Batal Edit</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: RIWAYAT -->
+    <section class="tab-section" id="tab-riwayat">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div class="card-title" style="margin-bottom:0;"><i class="ti ti-history"></i> Riwayat Submission</div>
+          <button class="btn secondary sm" onclick="loadRiwayat()"><i class="ti ti-reload"></i> Refresh</button>
+        </div>
+        <div class="alert" id="alert-riwayat"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Gambar</th><th>Nama Wisata</th><th>Kategori</th><th>Status</th><th>Aksi</th></tr>
+            </thead>
+            <tbody id="tbody-riwayat">
+              <tr class="empty-row"><td colspan="5"><i class="ti ti-inbox"></i><br/>Belum ada submission</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const SUPABASE_URL = "https://tjfzwvsxjeppbfxublao.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqZnp3dnN4amVwcGJmeHVibGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwOTEzNzAsImV4cCI6MjA5NDY2NzM3MH0.CadilieTx0tM0Du6lLRF8zKO_gsH9mnELcmWEnhEamE";
+const CAT_MAP = {alam:1,religi:2,kuliner:3,edukasi:4,oleholeh:5};
+let currentUser = null;
+let editId = null;
+
+// CEK SESSION
+const ses = sessionStorage.getItem("wk_user");
+if(!ses){ window.location.href="/"; }
+else {
+  currentUser = JSON.parse(ses);
+  if(currentUser.role !== "mitra"){ window.location.href="/admin/"; }
+  document.getElementById("user-name").textContent = currentUser.nama || "Mitra";
+  document.getElementById("avatar-initial").textContent = (currentUser.nama||"M")[0].toUpperCase();
+  loadStats();
+}
+
+function doLogout(){
+  sessionStorage.removeItem("wk_user");
+  window.location.href="/";
+}
+
+function toggleSidebar(){
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("overlay").style.display =
+    document.getElementById("sidebar").classList.contains("open") ? "block" : "none";
+}
+function closeSidebar(){
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("overlay").style.display="none";
+}
+
+function showTab(tab, el){
+  document.querySelectorAll(".tab-section").forEach(s=>s.classList.remove("active"));
+  document.getElementById("tab-"+tab).classList.add("active");
+  document.querySelectorAll(".menu").forEach(m=>m.classList.remove("active"));
+  if(el) el.classList.add("active");
+  closeSidebar();
+  if(tab==="riwayat") loadRiwayat();
+}
+
+async function loadStats(){
+  try{
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/wisata?id_mitra=eq.${currentUser.id}&select=status`,{
+      headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}
+    });
+    const data = await r.json();
+    document.getElementById("stat-total").textContent = data.length;
+    document.getElementById("stat-pending").textContent = data.filter(d=>d.status==="pending").length;
+    document.getElementById("stat-approved").textContent = data.filter(d=>d.status==="approved").length;
+  } catch(e){}
+}
+
+async function loadRiwayat(){
+  try{
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/wisata?id_mitra=eq.${currentUser.id}&select=*&order=created_at.desc`,{
+      headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}
+    });
+    const data = await r.json();
+    const tb = document.getElementById("tbody-riwayat");
+    if(!data.length){ tb.innerHTML='<tr class="empty-row"><td colspan="5"><i class="ti ti-inbox"></i><br/>Belum ada submission</td></tr>'; return; }
+    tb.innerHTML = data.map(w=>`
+      <tr>
+        <td><img src="${w.gambar_url||''}" class="tbl-img" alt="" onerror="this.style.display='none'"></td>
+        <td><strong>${w.nama}</strong>${w.lokasi?`<br><small style="color:var(--gray-400)">📍 ${w.lokasi}</small>`:""}</td>
+        <td><span class="badge badge-${w.kategori}">${w.kategori||"-"}</span></td>
+        <td><span class="badge badge-${w.status||'pending'}">${statusLabel(w.status)}</span></td>
+        <td>
+          ${w.status==="pending"||w.status==="rejected" ? `<button class="btn secondary sm" onclick='editWisata(${JSON.stringify(w).replace(/'/g,"&#39;")})' title="Edit"><i class="ti ti-edit"></i> Edit</button>` : ""}
+        </td>
+      </tr>`).join("");
+  } catch(e){ console.error(e); }
+}
+
+function statusLabel(s){
+  const map={pending:"Menunggu Review",approved:"Disetujui",rejected:"Ditolak"};
+  return map[s]||s||"Pending";
+}
+
+function autoCategory(){
+  document.getElementById("f-cat-id") && (document.getElementById("f-cat-id").value = CAT_MAP[document.getElementById("f-kategori").value]||"");
+}
+
+function updatePreview(url){
+  const p = document.getElementById("preview");
+  p.innerHTML = url ? `<img src="${url}" alt="preview" onerror="this.parentElement.innerHTML='<i class=\\'ti ti-photo-off\\'></i><span>Gagal memuat</span>'">` : '<i class="ti ti-photo"></i><span>Preview</span>';
+}
+
+async function detectMaps(){
+  const url = document.getElementById("f-maps").value;
+  if(!url){ showAlert("alert-form","Masukkan URL Google Maps","error"); return; }
+  const coords = extractCoords(url);
+  if(!coords){ showAlert("alert-form","Koordinat tidak ditemukan","error"); return; }
+  document.getElementById("f-lat").value = coords.lat;
+  document.getElementById("f-lng").value = coords.lng;
+  try{
+    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json&accept-language=id`);
+    const d = await r.json();
+    document.getElementById("f-alamat").value = d.display_name||"";
+  }catch(e){}
+  const thumb=`https://staticmap.openstreetmap.de/staticmap.php?center=${coords.lat},${coords.lng}&zoom=17&size=600x400&markers=${coords.lat},${coords.lng},red-pushpin`;
+  document.getElementById("f-gambar").value=thumb;
+  updatePreview(thumb);
+  showAlert("alert-form","Lokasi berhasil dideteksi","success");
+}
+function extractCoords(url){
+  let m=url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if(m) return{lat:m[1],lng:m[2]};
+  m=url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+  if(m) return{lat:m[1],lng:m[2]};
+  return null;
+}
+
+async function submitWisata(){
+  const nama=document.getElementById("f-nama").value.trim();
+  const kategori=document.getElementById("f-kategori").value;
+  const deskripsi=document.getElementById("f-deskripsi").value.trim();
+  if(!nama||!kategori||!deskripsi){ showAlert("alert-form","Nama, Kategori, dan Deskripsi wajib diisi","error"); return; }
+  const body={
+    nama,kategori,deskripsi,
+    category_id:CAT_MAP[kategori]||1,
+    deskripsi_singkat:document.getElementById("f-singkat").value||null,
+    alamat:document.getElementById("f-alamat").value||null,
+    latitude:parseFloat(document.getElementById("f-lat").value)||null,
+    longitude:parseFloat(document.getElementById("f-lng").value)||null,
+    maps_url:document.getElementById("f-maps").value||null,
+    gambar_url:document.getElementById("f-gambar").value||null,
+    jam_buka:document.getElementById("f-jam-buka").value||null,
+    harga_tiket:document.getElementById("f-harga-tiket").value||"Gratis",
+    lokasi:document.getElementById("f-lokasi").value||null,
+    status:"pending",
+    id_mitra:currentUser.id
+  };
+  let method="POST",url=`${SUPABASE_URL}/rest/v1/wisata`;
+  if(editId){ method="PATCH"; url+=`?id=eq.${editId}`; delete body.status; }
+  try{
+    const r=await fetch(url,{method,headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`,"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify(body)});
+    if(r.ok){
+      showAlert("alert-form",editId?"Data berhasil diperbarui, menunggu review ulang!":"Wisata berhasil disubmit, menunggu review admin!","success");
+      resetForm(); loadStats();
+    } else {
+      const e=await r.json();
+      showAlert("alert-form","Gagal: "+(e.message||"Coba lagi"),"error");
+    }
+  }catch(e){ showAlert("alert-form","Error koneksi ke server","error"); }
+}
+
+function editWisata(w){
+  editId=w.id;
+  document.getElementById("f-nama").value=w.nama||"";
+  document.getElementById("f-kategori").value=w.kategori||"";
+  document.getElementById("f-jam-buka").value=w.jam_buka||"";
+  document.getElementById("f-harga-tiket").value=w.harga_tiket||"";
+  document.getElementById("f-lokasi").value=w.lokasi||"";
+  document.getElementById("f-singkat").value=w.deskripsi_singkat||"";
+  document.getElementById("f-deskripsi").value=w.deskripsi||"";
+  document.getElementById("f-maps").value=w.maps_url||"";
+  document.getElementById("f-lat").value=w.latitude||"";
+  document.getElementById("f-lng").value=w.longitude||"";
+  document.getElementById("f-alamat").value=w.alamat||"";
+  document.getElementById("f-gambar").value=w.gambar_url||"";
+  updatePreview(w.gambar_url);
+  document.getElementById("form-title").innerHTML=`<i class="ti ti-pencil"></i> Edit Submission: ${w.nama}`;
+  document.getElementById("btn-cancel").style.display="inline-flex";
+  showTab("submit",document.querySelectorAll(".menu")[0]);
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function cancelEdit(){ resetForm(); }
+
+function resetForm(){
+  editId=null;
+  document.querySelectorAll("#tab-submit input, #tab-submit textarea, #tab-submit select").forEach(el=>{
+    el.tagName==="SELECT" ? el.selectedIndex=0 : el.value="";
+  });
+  document.getElementById("preview").innerHTML='<i class="ti ti-photo"></i><span>Preview</span>';
+  document.getElementById("form-title").innerHTML='<i class="ti ti-map-pin"></i> Submit Wisata Baru';
+  document.getElementById("btn-cancel").style.display="none";
+  hideAlert("alert-form");
+}
+
+function showAlert(id,msg,type){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.textContent=msg; el.className=`alert alert-${type} show`;
+  setTimeout(()=>hideAlert(id),5000);
+}
+function hideAlert(id){ const el=document.getElementById(id); if(el){el.className="alert";el.textContent="";} }
+</script>
+</body>
+</html>
