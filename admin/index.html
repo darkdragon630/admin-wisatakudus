@@ -274,6 +274,16 @@ async function loadApproval(){
       </td>
     </tr>`).join("");
     
+    // ✅ PASANG EVENT LISTENER SETELAH DATA DIMUAT
+    tb.addEventListener("click", function(e) {
+      const target = e.target.closest("button[data-action]");
+      if (!target) return;
+      
+      const id = parseInt(target.dataset.id);
+      const action = target.dataset.action;
+      updateStatus(id, action, target);
+    });
+    
     loadPendingCount();
   }catch(e){console.error("loadApproval error:",e);showApprovalAlert("Gagal memuat data: "+e.message,"error");}
 }
@@ -337,19 +347,10 @@ function escHtml(str){
   return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
-// ===== EVENT DELEGATION =====
+// ===== EVENT DELEGATION DI SINI (TANPA DOMContentLoaded) =====
+// Hapus event listener dari DOMContentLoaded karena sudah dipasang di loadApproval()
 document.addEventListener("DOMContentLoaded", function() {
     testConnection();
-    
-    // Tangkap klik dari tbody-approval (delegasi event)
-    document.getElementById("tbody-approval").addEventListener("click", function(e) {
-        const target = e.target.closest("button[data-action]");
-        if (!target) return;
-        
-        const id = parseInt(target.dataset.id);
-        const action = target.dataset.action;
-        updateStatus(id, action, target);
-    });
 });
 </script>
 </body>
