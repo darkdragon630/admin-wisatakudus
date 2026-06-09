@@ -89,11 +89,6 @@ tr:last-child td{border-bottom:none;}
 .rating-input-group{display:flex;align-items:center;gap:8px;}
 .rating-input-group input{width:80px;}
 .stars-display{color:#f59e0b;font-size:1rem;letter-spacing:2px;}
-/* DEBUG BOX */
-.debug-panel{background:#1e293b;color:#94a3b8;border-radius:var(--radius-sm);padding:12px 14px;font-size:0.78rem;font-family:monospace;margin-bottom:16px;line-height:1.8;word-break:break-all;}
-.debug-panel .d-ok{color:#34d399;}
-.debug-panel .d-err{color:#f87171;}
-.debug-panel .d-warn{color:#fbbf24;}
 @media(max-width:1024px){
   .content{margin-left:0;padding:70px 16px 16px;}
   .sidebar{transform:translateX(-100%);}
@@ -105,21 +100,22 @@ tr:last-child td{border-bottom:none;}
   .img-grid{grid-template-columns:1fr;}
 }
 </style>
-
-<!-- AUTO SESSION: tangkap role, nama, uid dari URL -->
 <script>
+// AUTO SESSION - tangkap role, nama, uid dari URL
 (function(){
-  const p   = new URLSearchParams(window.location.search);
-  const r   = p.get("role");
-  const n   = p.get("nama");
+  const p = new URLSearchParams(window.location.search);
+  const r = p.get("role");
+  const n = p.get("nama");
   const uid = p.get("uid");
+  
   if (r && n) {
-    const parsed = uid ? parseInt(uid) : null;
+    const parsedUid = uid ? parseInt(uid) : null;
     sessionStorage.setItem("wk_user", JSON.stringify({
-      id:   (!isNaN(parsed) && parsed > 0) ? parsed : null,
+      id: (parsedUid && parsedUid > 0) ? parsedUid : null,
       nama: decodeURIComponent(n),
       role: r
     }));
+    // Hapus parameter dari URL agar tidak kelihatan
     window.history.replaceState({}, "", window.location.pathname);
   }
 })();
@@ -157,6 +153,7 @@ tr:last-child td{border-bottom:none;}
         <div class="stat-card"><div class="num" id="stat-pending" style="color:var(--warning);">0</div><div class="label">Menunggu Review</div></div>
         <div class="stat-card"><div class="num" id="stat-approved" style="color:var(--success);">0</div><div class="label">Disetujui</div></div>
       </div>
+
       <div class="card">
         <div class="card-title" id="form-title"><i class="ti ti-map-pin"></i> Submit Wisata Baru</div>
         <div class="info-box"><i class="ti ti-info-circle"></i> Data yang Anda submit akan direview oleh admin sebelum ditampilkan ke publik.</div>
@@ -250,8 +247,6 @@ tr:last-child td{border-bottom:none;}
           <div class="card-title" style="margin-bottom:0;"><i class="ti ti-history"></i> Riwayat Submission</div>
           <button class="btn secondary sm" onclick="loadRiwayat()"><i class="ti ti-reload"></i> Refresh</button>
         </div>
-        <!-- DEBUG PANEL — selalu tampil, bantu diagnosa -->
-        <div class="debug-panel" id="debug-panel">Memuat info sesi...</div>
         <div class="alert" id="alert-riwayat"></div>
         <div class="table-wrap">
           <table>
@@ -276,15 +271,6 @@ const CAT_MAP = { alam:1, religi:2, kuliner:3, edukasi:4, oleholeh:5 };
 let currentUser = null;
 let editId = null;
 
-// ─── DEBUG HELPER ───────────────────────────────────────────────────────────
-function dbg(lines) {
-  const el = document.getElementById("debug-panel");
-  if (!el) return;
-  el.innerHTML = lines.map(([label, val, ok]) =>
-    `<span class="${ok===true?'d-ok':ok===false?'d-err':'d-warn'}">${label}:</span> ${val}`
-  ).join("<br>");
-}
-
 // ─── SESSION CHECK ──────────────────────────────────────────────────────────
 const ses = sessionStorage.getItem("wk_user");
 if (!ses) {
@@ -297,15 +283,21 @@ if (!ses) {
   document.getElementById("avatar-initial").textContent = (currentUser.nama || "M")[0].toUpperCase();
   document.getElementById("f-mitra").value = currentUser.nama || "";
 
-  if (!currentUser.id) {
-    loadMitraId().then(() => loadStats());
+  // Jika user.id tidak ada, coba ambil dari database
+  if (!currentUser.id || currentUser.id === null) {
+    loadMitraId().then(() => {
+      loadStats();
+      loadRiwayat();
+    });
   } else {
     loadStats();
+    loadRiwayat();
   }
 }
 
 // ─── AMBIL ID MITRA DARI DB (fallback) ─────────────────────────────────────
 async function loadMitraId() {
+  if (!currentUser.nama) return null;
   try {
     const url = `${SUPABASE_URL}/rest/v1/mitra?nama=eq.${encodeURIComponent(currentUser.nama)}&select=id&limit=1`;
     const r = await fetch(url, {
@@ -314,10 +306,14 @@ async function loadMitraId() {
     const data = await r.json();
     if (Array.isArray(data) && data.length > 0 && data[0].id) {
       currentUser.id = data[0].id;
+      // Update sessionStorage
       sessionStorage.setItem("wk_user", JSON.stringify(currentUser));
+      return currentUser.id;
     }
+    return null;
   } catch (e) {
     console.error("loadMitraId error:", e);
+    return null;
   }
 }
 
@@ -350,7 +346,10 @@ function showTab(tab, el) {
 
 // ─── STATS ──────────────────────────────────────────────────────────────────
 async function loadStats() {
-  if (!currentUser.id) return;
+  if (!currentUser.id) {
+    const id = await loadMitraId();
+    if (!id) return;
+  }
   try {
     const r = await fetch(
       `${SUPABASE_URL}/rest/v1/wisata?id_mitra=eq.${currentUser.id}&select=status`,
@@ -370,42 +369,23 @@ async function loadRiwayat() {
   tb.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="ti ti-loader"></i><br/>Memuat data...</td></tr>';
 
   // Pastikan id ada
-  if (!currentUser.id) await loadMitraId();
-
-  // Tampilkan info debug
-  dbg([
-    ["Nama sesi",    currentUser.nama  || "(kosong)", !!currentUser.nama],
-    ["id_mitra",     currentUser.id    ?? "null — belum dapat dari DB", !!currentUser.id],
-    ["Role",         currentUser.role  || "(kosong)", currentUser.role === "mitra"],
-  ]);
-
   if (!currentUser.id) {
-    tb.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="ti ti-alert-circle"></i><br/>id_mitra tidak ditemukan. Cek debug di atas.</td></tr>';
-    return;
+    const id = await loadMitraId();
+    if (!id) {
+      tb.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="ti ti-alert-circle"></i><br/>id_mitra tidak ditemukan. Silakan login ulang.</td></tr>';
+      return;
+    }
   }
 
   try {
     const apiUrl = `${SUPABASE_URL}/rest/v1/wisata?id_mitra=eq.${currentUser.id}&select=*&order=created_at.desc`;
-    dbg([
-      ["Nama sesi",  currentUser.nama, true],
-      ["id_mitra",  currentUser.id,    true],
-      ["Query URL", apiUrl,            null],
-    ]);
-
-    const r    = await fetch(apiUrl, {
+    const r = await fetch(apiUrl, {
       headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
     });
     const data = await r.json();
 
-    dbg([
-      ["Nama sesi",       currentUser.nama,        true],
-      ["id_mitra",        currentUser.id,           true],
-      ["HTTP status",     r.status,                 r.ok],
-      ["Jumlah hasil",    Array.isArray(data) ? data.length : "error — " + JSON.stringify(data), Array.isArray(data)],
-    ]);
-
     if (!Array.isArray(data)) {
-      tb.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="ti ti-alert-circle"></i><br/>Response tidak valid. Lihat debug.</td></tr>';
+      tb.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="ti ti-alert-circle"></i><br/>Response tidak valid.</td></tr>';
       return;
     }
     if (!data.length) {
@@ -439,7 +419,6 @@ async function loadRiwayat() {
         </td>
       </tr>`).join("");
   } catch (e) {
-    dbg([["Error", e.message, false]]);
     tb.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="ti ti-alert-circle"></i><br/>Error koneksi ke server.</td></tr>';
   }
 }
@@ -495,12 +474,19 @@ async function submitWisata() {
   if (!nama || !kategori || !deskripsi) {
     showAlert("alert-form","Nama, Kategori, dan Deskripsi wajib diisi","error"); return;
   }
+
+  // Pastikan id_mitra tersedia
   if (!currentUser.id) {
-    await loadMitraId();
-    if (!currentUser.id) { showAlert("alert-form","Sesi tidak valid, silakan login ulang","error"); return; }
+    const id = await loadMitraId();
+    if (!id) {
+      showAlert("alert-form","Sesi tidak valid, silakan login ulang","error");
+      return;
+    }
   }
+
   const ratingRaw = parseFloat(document.getElementById("f-rating").value);
   const rating    = (!isNaN(ratingRaw) && ratingRaw >= 0 && ratingRaw <= 5) ? ratingRaw : 0.0;
+
   const body = {
     nama, kategori, deskripsi,
     category_id:       CAT_MAP[kategori] || 1,
@@ -517,22 +503,40 @@ async function submitWisata() {
     status:   "pending",
     id_mitra: currentUser.id
   };
-  let method = "POST", url = `${SUPABASE_URL}/rest/v1/wisata`;
-  if (editId) { method = "PATCH"; url += `?id=eq.${editId}`; delete body.status; }
+
+  let method = "POST";
+  let url = `${SUPABASE_URL}/rest/v1/wisata`;
+
+  if (editId) {
+    method = "PATCH";
+    url += `?id=eq.${editId}`;
+    delete body.status; // Jangan update status saat edit
+  }
+
   try {
     const r = await fetch(url, {
       method,
-      headers: { apikey:SUPABASE_KEY, Authorization:`Bearer ${SUPABASE_KEY}`, "Content-Type":"application/json", "Prefer":"return=representation" },
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
+      },
       body: JSON.stringify(body)
     });
+
     if (r.ok) {
       showAlert("alert-form", editId ? "Data berhasil diperbarui!" : "Wisata berhasil disubmit!", "success");
-      resetForm(); loadStats();
+      resetForm();
+      loadStats();
+      loadRiwayat();
     } else {
       const e = await r.json();
       showAlert("alert-form","Gagal: "+(e.message||"Coba lagi"),"error");
     }
-  } catch(e) { showAlert("alert-form","Error koneksi ke server","error"); }
+  } catch(e) {
+    showAlert("alert-form","Error koneksi ke server: "+e.message,"error");
+  }
 }
 
 // ─── EDIT ───────────────────────────────────────────────────────────────────
