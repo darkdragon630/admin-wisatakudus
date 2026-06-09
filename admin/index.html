@@ -6,80 +6,596 @@
 <title>Dashboard Admin — Wisata Kudus</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
 <style>
-:root{--primary:#4f46e5;--primary-light:#6366f1;--primary-dark:#4338ca;--secondary:#64748b;--success:#10b981;--danger:#ef4444;--warning:#f59e0b;--info:#3b82f6;--dark:#1e293b;--light:#f8fafc;--white:#ffffff;--gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;--gray-300:#d1d5db;--gray-400:#9ca3af;--gray-500:#6b7280;--gray-600:#4b5563;--gray-700:#374151;--shadow-sm:0 1px 2px rgba(0,0,0,0.05);--shadow:0 1px 3px rgba(0,0,0,0.1),0 1px 2px rgba(0,0,0,0.06);--shadow-md:0 4px 6px rgba(0,0,0,0.07),0 2px 4px rgba(0,0,0,0.06);--shadow-lg:0 10px 15px rgba(0,0,0,0.1),0 4px 6px rgba(0,0,0,0.05);--radius:12px;--radius-sm:8px;--transition:all 0.3s ease;}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--gray-100);color:var(--dark);line-height:1.6;}
-.app{display:flex;min-height:100vh;}
-.sidebar{width:260px;background:var(--dark);color:var(--white);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:1000;transition:transform 0.3s ease;}
-.logo{padding:24px 20px;display:flex;align-items:center;gap:12px;font-size:1.25rem;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.1);}
-.logo i{font-size:1.5rem;color:var(--primary-light);}
-.user-info{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.1);}
-.user-info .avatar{width:38px;height:38px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.95rem;margin-bottom:8px;}
-.user-info .uname{font-size:0.88rem;font-weight:600;color:white;}
-.user-info .urole{font-size:0.72rem;background:rgba(255,255,255,0.15);padding:2px 10px;border-radius:50px;color:rgba(255,255,255,0.8);display:inline-block;margin-top:4px;}
-.nav-menu{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px;}
-.menu{display:flex;align-items:center;gap:12px;padding:12px 16px;background:transparent;border:none;color:var(--gray-300);border-radius:var(--radius-sm);cursor:pointer;font-size:0.95rem;transition:var(--transition);width:100%;text-align:left;font-family:inherit;}
-.menu:hover{background:rgba(255,255,255,0.1);color:var(--white);}
-.menu.active{background:var(--primary);color:var(--white);font-weight:600;}
-.menu i{font-size:1.25rem;}
-.sidebar-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,0.1);display:flex;flex-direction:column;gap:8px;}
-.btn-logout{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;padding:10px 16px;border-radius:var(--radius-sm);cursor:pointer;font-size:0.88rem;font-family:inherit;display:flex;align-items:center;gap:8px;transition:var(--transition);}
-.btn-logout:hover{background:rgba(239,68,68,0.25);}
-.mobile-header{display:none;align-items:center;gap:12px;padding:16px;background:var(--dark);color:var(--white);position:fixed;top:0;left:0;right:0;z-index:999;}
-.hamburger{background:transparent;border:none;color:var(--white);font-size:1.5rem;cursor:pointer;padding:4px;}
-.content{flex:1;margin-left:260px;padding:24px;transition:margin-left 0.3s ease;}
-.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:16px;}
-.topbar h1{font-size:1.75rem;color:var(--dark);}
-.topbar-actions{display:flex;align-items:center;gap:12px;}
-.status{display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--white);border-radius:50px;box-shadow:var(--shadow-sm);font-size:0.9rem;color:var(--secondary);}
-.status i{color:var(--danger);}
-.status.connected{color:var(--success);}
-.status.connected i{color:var(--success);}
-.card{background:var(--white);border-radius:var(--radius);padding:24px;margin-bottom:24px;box-shadow:var(--shadow);border:1px solid var(--gray-200);}
-.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
-.card-header h3{display:flex;align-items:center;gap:8px;font-size:1.25rem;color:var(--dark);}
-.card-header h3 i{color:var(--primary);}
-.tab-section{display:none;}
-.tab-section.active{display:block;}
-.approve-actions{display:flex;gap:6px;flex-wrap:wrap;}
-.table-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
-.table-head h3{display:flex;align-items:center;gap:8px;}
-.table-actions{display:flex;align-items:center;gap:12px;}
-.badge{padding:4px 12px;background:var(--gray-100);border-radius:50px;font-size:0.85rem;color:var(--secondary);font-weight:600;}
-.badge-pending{background:#fef3c7;color:#92400e;}
-.badge-approved{background:#d1fae5;color:#065f46;}
-.badge-rejected{background:#fee2e2;color:#991b1b;}
-.badge-alam{background:#d1fae5;color:#065f46;}
-.badge-religi{background:#fef3c7;color:#92400e;}
-.badge-kuliner{background:#fee2e2;color:#991b1b;}
-.badge-edukasi{background:#dbeafe;color:#1e40af;}
-.badge-oleholeh{background:#fce7f3;color:#831843;}
-.table-wrap{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;}
-thead{background:var(--gray-50);}
-th{padding:12px 16px;text-align:left;font-weight:700;color:var(--gray-600);font-size:0.85rem;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid var(--gray-200);}
-td{padding:12px 16px;border-bottom:1px solid var(--gray-200);vertical-align:middle;}
-.tbl-img{width:80px;height:60px;object-fit:cover;border-radius:6px;}
-.empty-state{text-align:center;color:var(--gray-400);}
-.empty-state i{font-size:3rem;display:block;margin-bottom:8px;}
-.empty-state p{font-size:1rem;}
-#alert{margin-bottom:16px;}
-.alert-msg{padding:12px 16px;border-radius:var(--radius-sm);margin-bottom:8px;display:flex;align-items:center;gap:8px;animation:slideDown 0.3s ease;}
-.alert-error{background:#fef2f2;color:var(--danger);border:1px solid #fecaca;}
-.alert-success{background:#f0fdf4;color:var(--success);border:1px solid #bbf7d0;}
-@keyframes slideDown{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
-.overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:998;}
-.config-expiry{font-size:0.82rem;margin-top:8px;}
-@media(max-width:1024px){
-  .content{margin-left:0;padding:80px 16px 16px;}
-  .sidebar{transform:translateX(-100%);}
-  .sidebar.open{transform:translateX(0);}
-  .mobile-header{display:flex;}
-  .topbar{display:none;}
+/* ===== CSS VARIABLES ===== */
+:root {
+  --primary: #4f46e5;
+  --primary-light: #6366f1;
+  --primary-dark: #4338ca;
+  --secondary: #64748b;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+  --dark: #1e293b;
+  --light: #f8fafc;
+  --white: #ffffff;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --transition: all 0.3s ease;
 }
-@media(max-width:640px){
-  .content{padding:72px 12px 12px;}
-  .card{padding:16px;}
+
+/* ===== GLOBAL RESET ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--gray-100);
+  color: var(--dark);
+  line-height: 1.6;
+}
+
+/* ===== APP LAYOUT ===== */
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 260px;
+  background: var(--dark);
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+}
+
+.logo {
+  padding: 24px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo i {
+  font-size: 1.5rem;
+  color: var(--primary-light);
+}
+
+.user-info {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-info .avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+
+.user-info .uname {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: white;
+}
+
+.user-info .urole {
+  font-size: 0.72rem;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 2px 10px;
+  border-radius: 50px;
+  color: rgba(255, 255, 255, 0.8);
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.nav-menu {
+  flex: 1;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  color: var(--gray-300);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: var(--transition);
+  width: 100%;
+  text-align: left;
+}
+
+.menu:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--white);
+}
+
+.menu.active {
+  background: var(--primary);
+  color: var(--white);
+  font-weight: 600;
+}
+
+.menu i {
+  font-size: 1.25rem;
+}
+
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn-logout {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition);
+}
+
+.btn-logout:hover {
+  background: rgba(239, 68, 68, 0.25);
+}
+
+/* ===== MOBILE HEADER ===== */
+.mobile-header {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--dark);
+  color: var(--white);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+}
+
+.hamburger {
+  background: transparent;
+  border: none;
+  color: var(--white);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* ===== MAIN CONTENT ===== */
+.content {
+  flex: 1;
+  margin-left: 260px;
+  padding: 24px;
+  transition: margin-left 0.3s ease;
+}
+
+/* ===== TOPBAR ===== */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.topbar h1 {
+  font-size: 1.75rem;
+  color: var(--dark);
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--white);
+  border-radius: 50px;
+  box-shadow: var(--shadow-sm);
+  font-size: 0.9rem;
+  color: var(--secondary);
+}
+
+.status i {
+  color: var(--danger);
+}
+
+.status.connected {
+  color: var(--success);
+}
+
+.status.connected i {
+  color: var(--success);
+}
+
+/* ===== CARD ===== */
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--gray-200);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.card-header h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.25rem;
+  color: var(--dark);
+}
+
+.card-header h3 i {
+  color: var(--primary);
+}
+
+/* ===== TAB SECTION ===== */
+.tab-section {
+  display: none;
+}
+
+.tab-section.active {
+  display: block;
+}
+
+/* ===== TABLE ===== */
+.table-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.table-head h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.approve-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.badge {
+  padding: 4px 12px;
+  background: var(--gray-100);
+  border-radius: 50px;
+  font-size: 0.85rem;
+  color: var(--secondary);
+  font-weight: 600;
+}
+
+.badge-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-approved {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badge-rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-alam {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badge-religi {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-kuliner {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-edukasi {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-oleholeh {
+  background: #fce7f3;
+  color: #831843;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: var(--gray-50);
+}
+
+th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--gray-600);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--gray-200);
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--gray-200);
+  vertical-align: middle;
+}
+
+.tbl-img {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--gray-400);
+}
+
+.empty-state i {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.empty-state p {
+  font-size: 1rem;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn.primary {
+  background: var(--primary);
+  color: var(--white);
+  border-color: var(--primary);
+}
+
+.btn.primary:hover {
+  background: var(--primary-dark);
+}
+
+.btn.secondary {
+  background: var(--white);
+  color: var(--secondary);
+  border-color: var(--gray-300);
+}
+
+.btn.secondary:hover {
+  background: var(--gray-50);
+  border-color: var(--gray-400);
+}
+
+.btn.danger {
+  background: var(--danger);
+  color: var(--white);
+  border-color: var(--danger);
+}
+
+.btn.danger:hover {
+  background: #dc2626;
+}
+
+.btn.success {
+  background: var(--success);
+  color: var(--white);
+  border-color: var(--success);
+}
+
+.btn.small {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.btn-lg {
+  padding: 12px 24px;
+  font-size: 1rem;
+}
+
+.btn-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+/* ===== ALERT ===== */
+#alert-approval {
+  margin-bottom: 16px;
+}
+
+.alert-msg {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: slideDown 0.3s ease;
+}
+
+.alert-error {
+  background: #fef2f2;
+  color: var(--danger);
+  border: 1px solid #fecaca;
+}
+
+.alert-success {
+  background: #f0fdf4;
+  color: var(--success);
+  border: 1px solid #bbf7d0;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== OVERLAY ===== */
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .content {
+    margin-left: 0;
+    padding: 80px 16px 16px;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .mobile-header {
+    display: flex;
+  }
+
+  .topbar {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .content {
+    padding: 72px 12px 12px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .table-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 </style>
 <script>
@@ -108,7 +624,6 @@ if(r&&n){sessionStorage.setItem("wk_user",JSON.stringify({id:null,nama:decodeURI
     <nav class="nav-menu">
       <button class="menu active" onclick="showTab('approval',this)"><i class="ti ti-checks"></i> Approval Mitra <span id="pending-badge" style="background:#ef4444;color:white;padding:1px 7px;border-radius:50px;font-size:0.72rem;margin-left:auto;"></span></button>
       <button class="menu" onclick="showTab('daftar',this)"><i class="ti ti-list-check"></i> Daftar Wisata</button>
-      <button class="menu" onclick="showTab('konfig',this)"><i class="ti ti-settings"></i> Konfigurasi</button>
     </nav>
     <div class="sidebar-footer">
       <button class="btn-logout" onclick="doLogout()"><i class="ti ti-logout"></i> Keluar</button>
@@ -122,24 +637,6 @@ if(r&&n){sessionStorage.setItem("wk_user",JSON.stringify({id:null,nama:decodeURI
         <div id="conn-status" class="status"><i class="ti ti-plug-connected"></i><span id="status-text">Menghubungkan...</span></div>
       </div>
     </div>
-
-    <!-- KONFIG -->
-    <section class="tab-section" id="tab-konfig">
-      <div class="card">
-        <div class="card-header"><h3><i class="ti ti-database"></i> Konfigurasi Supabase</h3></div>
-        <p style="color:var(--gray-500);font-size:0.88rem;margin-bottom:16px;">Konfigurasi tersimpan selama <strong>24 jam</strong>.</p>
-        <div class="grid-2">
-          <div class="form-group full"><label>Project URL</label><input type="text" id="sb-url" placeholder="https://xxxx.supabase.co"/></div>
-          <div class="form-group full"><label>Anon Key</label><div class="password-field"><input type="password" id="sb-key" placeholder="eyJhbGci..."/><button class="toggle-password" onclick="togglePwd()"><i class="ti ti-eye" id="eye-icon"></i></button></div></div>
-        </div>
-        <div class="config-expiry" id="config-expiry"></div>
-        <div class="btn-row">
-          <button class="btn primary" onclick="saveConfig()"><i class="ti ti-plug-connected"></i> Simpan & Hubungkan</button>
-          <button class="btn secondary" onclick="testConnection()"><i class="ti ti-refresh"></i> Tes Koneksi</button>
-          <button class="btn danger" onclick="clearConfig()"><i class="ti ti-trash"></i> Hapus</button>
-        </div>
-      </div>
-    </section>
 
     <!-- APPROVAL -->
     <section class="tab-section active" id="tab-approval">
@@ -175,7 +672,6 @@ if(r&&n){sessionStorage.setItem("wk_user",JSON.stringify({id:null,nama:decodeURI
 const SUPABASE_URL_DEFAULT="https://tjfzwvsxjeppbfxublao.supabase.co";
 const SUPABASE_KEY_DEFAULT="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqZnp3dnN4amVwcGJmeHVibGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwOTEzNzAsImV4cCI6MjA5NDY2NzM3MH0.CadilieTx0tM0Du6lLRF8zKO_gsH9mnELcmWEnhEamE";
 let SUPABASE_URL=SUPABASE_URL_DEFAULT, SUPABASE_KEY=SUPABASE_KEY_DEFAULT;
-const CONFIG_KEY="wk_admin_config", EXPIRY_KEY="wk_admin_expiry";
 
 // AUTH CHECK
 const ses=sessionStorage.getItem("wk_user");
@@ -204,36 +700,6 @@ function showTab(tab,el){
   if(tab==="daftar") loadWisata();
   if(tab==="approval") loadApproval();
 }
-
-function saveConfig(){
-  SUPABASE_URL=document.getElementById("sb-url").value.trim();
-  SUPABASE_KEY=document.getElementById("sb-key").value.trim();
-  if(!SUPABASE_URL||!SUPABASE_KEY){showAlert("URL dan Key wajib diisi","error");return;}
-  localStorage.setItem(CONFIG_KEY,JSON.stringify({url:SUPABASE_URL,key:SUPABASE_KEY}));
-  localStorage.setItem(EXPIRY_KEY,Date.now()+86400000);
-  updateExpiryUI();testConnection();
-}
-function loadSavedConfig(){
-  const exp=localStorage.getItem(EXPIRY_KEY);
-  if(exp&&Date.now()<parseInt(exp)){
-    const c=JSON.parse(localStorage.getItem(CONFIG_KEY)||"{}");
-    if(c.url&&c.key){SUPABASE_URL=c.url;SUPABASE_KEY=c.key;document.getElementById("sb-url").value=SUPABASE_URL;document.getElementById("sb-key").value=SUPABASE_KEY;}
-  }
-  updateExpiryUI();testConnection();
-}
-function clearConfig(){
-  if(!confirm("Hapus konfigurasi?"))return;
-  localStorage.removeItem(CONFIG_KEY);localStorage.removeItem(EXPIRY_KEY);
-  document.getElementById("sb-url").value="";document.getElementById("sb-key").value="";
-  SUPABASE_URL=SUPABASE_URL_DEFAULT;SUPABASE_KEY=SUPABASE_KEY_DEFAULT;
-  updateExpiryUI();updateConnStatus(false);
-}
-function updateExpiryUI(){
-  const exp=localStorage.getItem(EXPIRY_KEY);const el=document.getElementById("config-expiry");
-  if(exp&&Date.now()<parseInt(exp)){const h=Math.floor((parseInt(exp)-Date.now())/3600000);el.textContent=`Konfigurasi berlaku: ${h} jam lagi`;el.style.color="var(--success)";}
-  else{el.textContent="Konfigurasi belum disimpan";el.style.color="var(--gray-400)";}
-}
-function togglePwd(){const i=document.getElementById("sb-key");const ic=document.getElementById("eye-icon");i.type=i.type==="password"?"text":"password";ic.className=i.type==="password"?"ti ti-eye":"ti ti-eye-off";}
 
 async function testConnection(){
   if(!SUPABASE_URL||!SUPABASE_KEY){updateConnStatus(false);return;}
@@ -283,9 +749,10 @@ async function loadApproval(){
 async function updateStatus(id,status){
   if(!confirm(`Yakin ingin ${status==="approved"?"menyetujui":"menolak"} data ini?`))return;
   try{
-    const r=await fetch(`${SUPABASE_URL}/rest/v1/wisata?id=eq.${id}`,{method:"PATCH",headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`,"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify({status})});
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/wisata?id=eq.${id}`,{method:"PATCH",headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({status})});
     if(r.ok){showApprovalAlert(status==="approved"?"Data berhasil disetujui!":"Data ditolak.",status==="approved"?"success":"error");loadApproval();}
-  }catch(e){showApprovalAlert("Gagal update status","error");}
+    else{const e=await r.json();showApprovalAlert("Gagal: "+(e.message||"Coba lagi"),"error");}
+  }catch(e){showApprovalAlert("Error koneksi: "+e.message,"error");}
 }
 
 async function loadWisata(){
@@ -311,7 +778,8 @@ function showApprovalAlert(msg,type){
   setTimeout(()=>{el.innerHTML="";},5000);
 }
 
-document.addEventListener("DOMContentLoaded",()=>{loadSavedConfig();setInterval(updateExpiryUI,60000);});
+// Jalankan test connection saat load
+document.addEventListener("DOMContentLoaded",()=>{testConnection();});
 </script>
 </body>
 </html>
