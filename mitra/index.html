@@ -227,10 +227,10 @@ if(r&&n){sessionStorage.setItem("wk_user",JSON.stringify({id:null,nama:decodeURI
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>Gambar</th><th>Nama Wisata</th><th>Kategori</th><th>Status</th><th>Aksi</th></tr>
+              <tr><th>Gambar</th><th>Nama Wisata</th><th>Kategori</th><th>Rating</th><th>Status</th><th>Aksi</th></tr>
             </thead>
             <tbody id="tbody-riwayat">
-              <tr class="empty-row"><td colspan="5"><i class="ti ti-inbox"></i><br/>Belum ada submission</td></tr>
+              <tr class="empty-row"><td colspan="6"><i class="ti ti-inbox"></i><br/>Belum ada submission</td></tr>
             </tbody>
           </table>
         </div>
@@ -255,6 +255,7 @@ else {
   document.getElementById("user-name").textContent = currentUser.nama || "Mitra";
   document.getElementById("avatar-initial").textContent = (currentUser.nama||"M")[0].toUpperCase();
   loadStats();
+  loadRiwayat();
 }
 
 function doLogout(){
@@ -300,12 +301,13 @@ async function loadRiwayat(){
     });
     const data = await r.json();
     const tb = document.getElementById("tbody-riwayat");
-    if(!data.length){ tb.innerHTML='<tr class="empty-row"><td colspan="5"><i class="ti ti-inbox"></i><br/>Belum ada submission</td></tr>'; return; }
+    if(!data.length){ tb.innerHTML='<tr class="empty-row"><td colspan="6"><i class="ti ti-inbox"></i><br/>Belum ada submission</td></tr>'; return; }
     tb.innerHTML = data.map(w=>`
       <tr>
         <td><img src="${w.gambar_url||''}" class="tbl-img" alt="" onerror="this.style.display='none'"></td>
         <td><strong>${w.nama}</strong>${w.lokasi?`<br><small style="color:var(--gray-400)">📍 ${w.lokasi}</small>`:""}</td>
         <td><span class="badge badge-${w.kategori}">${w.kategori||"-"}</span></td>
+        <td>${w.rating?`⭐ ${w.rating}`:"-"}</td>
         <td><span class="badge badge-${w.status||'pending'}">${statusLabel(w.status)}</span></td>
         <td>
           ${w.status==="pending"||w.status==="rejected" ? `<button class="btn secondary sm" onclick='editWisata(${JSON.stringify(w).replace(/'/g,"&#39;")})' title="Edit"><i class="ti ti-edit"></i> Edit</button>` : ""}
@@ -379,7 +381,7 @@ async function submitWisata(){
     const r=await fetch(url,{method,headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`,"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify(body)});
     if(r.ok){
       showAlert("alert-form",editId?"Data berhasil diperbarui, menunggu review ulang!":"Wisata berhasil disubmit, menunggu review admin!","success");
-      resetForm(); loadStats();
+      resetForm(); loadStats(); loadRiwayat();
     } else {
       const e=await r.json();
       showAlert("alert-form","Gagal: "+(e.message||"Coba lagi"),"error");
