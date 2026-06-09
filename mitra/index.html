@@ -45,6 +45,7 @@ body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:var(--gray-1
 label{font-weight:600;font-size:0.82rem;color:var(--gray-700);}
 input,select,textarea{width:100%;padding:10px 14px;border:1.5px solid var(--gray-300);border-radius:var(--radius-sm);font-size:0.88rem;font-family:inherit;outline:none;transition:var(--transition);color:var(--dark);background:white;}
 input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(13,148,136,0.1);}
+input[readonly]{background:var(--gray-50);color:var(--gray-500);cursor:not-allowed;}
 textarea{resize:vertical;min-height:80px;}
 .maps-box{display:flex;gap:8px;}
 .maps-box input{flex:1;}
@@ -85,13 +86,9 @@ tr:last-child td{border-bottom:none;}
 .empty-row i{font-size:2rem;display:block;margin-bottom:8px;}
 .info-box{background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--radius-sm);padding:12px 16px;font-size:0.85rem;color:#1d4ed8;display:flex;align-items:flex-start;gap:8px;margin-bottom:20px;}
 .info-box i{font-size:1.1rem;margin-top:2px;flex-shrink:0;}
-/* Rating stars */
 .rating-input-group{display:flex;align-items:center;gap:8px;}
 .rating-input-group input{width:80px;}
 .stars-display{color:#f59e0b;font-size:1rem;letter-spacing:2px;}
-/* Debug info box */
-.debug-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--radius-sm);padding:10px 14px;font-size:0.8rem;color:#9a3412;margin-bottom:12px;display:none;}
-.debug-box.show{display:block;}
 @media(max-width:1024px){
   .content{margin-left:0;padding:70px 16px 16px;}
   .sidebar{transform:translateX(-100%);}
@@ -103,11 +100,20 @@ tr:last-child td{border-bottom:none;}
   .img-grid{grid-template-columns:1fr;}
 }
 </style>
+
+<!-- ✅ AUTO SESSION: tangkap role, nama, uid dari URL (dikirim oleh Android) -->
 <script>
 (function(){
-  const p=new URLSearchParams(window.location.search);
-  const r=p.get("role"),n=p.get("nama");
-  if(r&&n){sessionStorage.setItem("wk_user",JSON.stringify({id:null,nama:decodeURIComponent(n),role:r}));window.history.replaceState({},"",window.location.pathname);}
+  const p = new URLSearchParams(window.location.search);
+  const r = p.get("role"), n = p.get("nama"), uid = p.get("uid");
+  if (r && n) {
+    sessionStorage.setItem("wk_user", JSON.stringify({
+      id:   uid ? parseInt(uid) : null,
+      nama: decodeURIComponent(n),
+      role: r
+    }));
+    window.history.replaceState({}, "", window.location.pathname);
+  }
 })();
 </script>
 </head>
@@ -117,6 +123,7 @@ tr:last-child td{border-bottom:none;}
   <button class="hamburger" onclick="toggleSidebar()"><i class="ti ti-menu-2"></i></button>
   <span style="font-weight:700;">Dashboard Mitra</span>
 </div>
+
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="logo"><i class="ti ti-map-pin"></i> Wisata Kudus</div>
@@ -133,11 +140,9 @@ tr:last-child td{border-bottom:none;}
   </aside>
 
   <main class="content">
-    <div class="topbar">
-      <h1>Dashboard Mitra</h1>
-    </div>
+    <div class="topbar"><h1>Dashboard Mitra</h1></div>
 
-    <!-- TAB: SUBMIT -->
+    <!-- ═══════════════ TAB: SUBMIT ═══════════════ -->
     <section class="tab-section active" id="tab-submit">
       <div class="stats-grid">
         <div class="stat-card"><div class="num" id="stat-total">0</div><div class="label">Total Submission</div></div>
@@ -149,7 +154,15 @@ tr:last-child td{border-bottom:none;}
         <div class="card-title" id="form-title"><i class="ti ti-map-pin"></i> Submit Wisata Baru</div>
         <div class="info-box"><i class="ti ti-info-circle"></i> Data yang Anda submit akan direview oleh admin sebelum ditampilkan ke publik.</div>
         <div class="alert" id="alert-form"></div>
+
         <div class="grid-2">
+
+          <!-- ✅ NAMA MITRA — otomatis dari session -->
+          <div class="form-group full">
+            <label>Nama Mitra</label>
+            <input type="text" id="f-mitra" readonly placeholder="Terisi otomatis dari akun Anda"/>
+          </div>
+
           <div class="form-group">
             <label>Nama Wisata *</label>
             <input type="text" id="f-nama" placeholder="Nama tempat wisata"/>
@@ -177,7 +190,8 @@ tr:last-child td{border-bottom:none;}
             <label>Lokasi / Area</label>
             <input type="text" id="f-lokasi" placeholder="Desa Colo, Kec. Dawe"/>
           </div>
-          <!-- ✅ FIELD RATING BARU -->
+
+          <!-- ✅ RATING -->
           <div class="form-group">
             <label>Rating Awal (0.0 – 5.0)</label>
             <div class="rating-input-group">
@@ -185,6 +199,7 @@ tr:last-child td{border-bottom:none;}
               <span class="stars-display" id="stars-display">☆☆☆☆☆</span>
             </div>
           </div>
+
           <div class="form-group full">
             <label>Deskripsi Singkat</label>
             <textarea id="f-singkat" rows="2" placeholder="Ringkasan singkat..."></textarea>
@@ -222,6 +237,7 @@ tr:last-child td{border-bottom:none;}
             </div>
           </div>
         </div>
+
         <div class="btn-row">
           <button class="btn primary" onclick="submitWisata()"><i class="ti ti-send"></i> Submit untuk Review</button>
           <button class="btn secondary" onclick="resetForm()"><i class="ti ti-refresh"></i> Reset</button>
@@ -230,7 +246,7 @@ tr:last-child td{border-bottom:none;}
       </div>
     </section>
 
-    <!-- TAB: RIWAYAT -->
+    <!-- ═══════════════ TAB: RIWAYAT ═══════════════ -->
     <section class="tab-section" id="tab-riwayat">
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
@@ -238,8 +254,6 @@ tr:last-child td{border-bottom:none;}
           <button class="btn secondary sm" onclick="loadRiwayat()"><i class="ti ti-reload"></i> Refresh</button>
         </div>
         <div class="alert" id="alert-riwayat"></div>
-        <!-- Debug info: tampil saat ada masalah -->
-        <div class="debug-box" id="debug-box"></div>
         <div class="table-wrap">
           <table>
             <thead>
@@ -265,22 +279,25 @@ tr:last-child td{border-bottom:none;}
 <script>
 const SUPABASE_URL = "https://tjfzwvsxjeppbfxublao.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqZnp3dnN4amVwcGJmeHVibGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwOTEzNzAsImV4cCI6MjA5NDY2NzM3MH0.CadilieTx0tM0Du6lLRF8zKO_gsH9mnELcmWEnhEamE";
-const CAT_MAP = {alam:1,religi:2,kuliner:3,edukasi:4,oleholeh:5};
+const CAT_MAP = { alam:1, religi:2, kuliner:3, edukasi:4, oleholeh:5 };
 
 let currentUser = null;
 let editId = null;
 
-// ─── SESSION CHECK ─────────────────────────────────────────────────────────
+// ─── SESSION CHECK ──────────────────────────────────────────────────────────
 const ses = sessionStorage.getItem("wk_user");
 if (!ses) {
   window.location.href = "/";
 } else {
   currentUser = JSON.parse(ses);
   if (currentUser.role !== "mitra") { window.location.href = "/admin/"; }
+
+  // Isi UI dari session
   document.getElementById("user-name").textContent = currentUser.nama || "Mitra";
   document.getElementById("avatar-initial").textContent = (currentUser.nama || "M")[0].toUpperCase();
+  document.getElementById("f-mitra").value = currentUser.nama || "";
 
-  // ✅ PERBAIKAN UTAMA: Jika id belum ada di session, cari dari tabel mitra
+  // ✅ Jika uid tidak dikirim dari Android (fallback), cari dari DB berdasarkan nama
   if (!currentUser.id) {
     loadMitraId().then(() => loadStats());
   } else {
@@ -288,7 +305,7 @@ if (!ses) {
   }
 }
 
-// ─── AMBIL ID MITRA DARI TABEL ─────────────────────────────────────────────
+// ─── AMBIL ID MITRA (fallback jika uid tidak ada di URL) ───────────────────
 async function loadMitraId() {
   try {
     const r = await fetch(
@@ -296,7 +313,7 @@ async function loadMitraId() {
       { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
     );
     const data = await r.json();
-    if (data && data.length > 0) {
+    if (Array.isArray(data) && data.length > 0) {
       currentUser.id = data[0].id;
       sessionStorage.setItem("wk_user", JSON.stringify(currentUser));
     }
@@ -305,13 +322,13 @@ async function loadMitraId() {
   }
 }
 
-// ─── LOGOUT ────────────────────────────────────────────────────────────────
+// ─── LOGOUT ─────────────────────────────────────────────────────────────────
 function doLogout() {
   sessionStorage.removeItem("wk_user");
   window.location.href = "/";
 }
 
-// ─── SIDEBAR ───────────────────────────────────────────────────────────────
+// ─── SIDEBAR ────────────────────────────────────────────────────────────────
 function toggleSidebar() {
   document.getElementById("sidebar").classList.toggle("open");
   document.getElementById("overlay").style.display =
@@ -322,7 +339,7 @@ function closeSidebar() {
   document.getElementById("overlay").style.display = "none";
 }
 
-// ─── TAB ───────────────────────────────────────────────────────────────────
+// ─── TAB ────────────────────────────────────────────────────────────────────
 function showTab(tab, el) {
   document.querySelectorAll(".tab-section").forEach(s => s.classList.remove("active"));
   document.getElementById("tab-" + tab).classList.add("active");
@@ -332,7 +349,7 @@ function showTab(tab, el) {
   if (tab === "riwayat") loadRiwayat();
 }
 
-// ─── STATS ─────────────────────────────────────────────────────────────────
+// ─── STATS ──────────────────────────────────────────────────────────────────
 async function loadStats() {
   if (!currentUser.id) return;
   try {
@@ -341,25 +358,23 @@ async function loadStats() {
       { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
     );
     const data = await r.json();
-    document.getElementById("stat-total").textContent = data.length;
-    document.getElementById("stat-pending").textContent = data.filter(d => d.status === "pending").length;
+    if (!Array.isArray(data)) return;
+    document.getElementById("stat-total").textContent   = data.length;
+    document.getElementById("stat-pending").textContent  = data.filter(d => d.status === "pending").length;
     document.getElementById("stat-approved").textContent = data.filter(d => d.status === "approved").length;
   } catch (e) {}
 }
 
-// ─── RIWAYAT ───────────────────────────────────────────────────────────────
+// ─── RIWAYAT ────────────────────────────────────────────────────────────────
 async function loadRiwayat() {
   const tb = document.getElementById("tbody-riwayat");
   tb.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="ti ti-loader"></i><br/>Memuat data...</td></tr>';
 
-  // ✅ Jika id belum ada, coba ambil dulu
-  if (!currentUser.id) {
-    await loadMitraId();
-  }
+  // Pastikan id ada, fallback ke DB jika perlu
+  if (!currentUser.id) await loadMitraId();
 
   if (!currentUser.id) {
     tb.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="ti ti-alert-circle"></i><br/>Sesi tidak valid, silakan login ulang.</td></tr>';
-    showDebug("id_mitra tidak ditemukan. Nama: " + currentUser.nama + ". Cek tabel mitra apakah nama cocok.");
     return;
   }
 
@@ -371,11 +386,9 @@ async function loadRiwayat() {
     const data = await r.json();
 
     if (!Array.isArray(data)) {
-      showDebug("Response tidak valid: " + JSON.stringify(data));
       tb.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="ti ti-alert-circle"></i><br/>Gagal memuat data.</td></tr>';
       return;
     }
-
     if (!data.length) {
       tb.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="ti ti-inbox"></i><br/>Belum ada submission</td></tr>';
       return;
@@ -385,8 +398,8 @@ async function loadRiwayat() {
       <tr>
         <td>
           ${w.gambar_url
-            ? `<img src="${w.gambar_url}" class="tbl-img" alt="" onerror="this.style.background='var(--gray-200)';this.src=''">`
-            : `<div class="tbl-img" style="background:var(--gray-100);display:flex;align-items:center;justify-content:center;"><i class="ti ti-photo" style="color:var(--gray-400)"></i></div>`}
+            ? `<img src="${w.gambar_url}" class="tbl-img" alt="" onerror="this.style.background='var(--gray-200)';this.removeAttribute('src')">`
+            : `<div class="tbl-img" style="display:flex;align-items:center;justify-content:center;"><i class="ti ti-photo" style="color:var(--gray-400)"></i></div>`}
         </td>
         <td>
           <strong>${w.nama}</strong>
@@ -400,32 +413,28 @@ async function loadRiwayat() {
         <td><span class="badge badge-${w.status || 'pending'}">${statusLabel(w.status)}</span></td>
         <td>
           ${(w.status === "pending" || w.status === "rejected")
-            ? `<button class="btn secondary sm" onclick='editWisata(${JSON.stringify(w).replace(/'/g, "&#39;")})' title="Edit">
+            ? `<button class="btn secondary sm" onclick='editWisata(${JSON.stringify(w).replace(/'/g,"&#39;")})'>
                 <i class="ti ti-edit"></i> Edit
                </button>`
             : "—"}
         </td>
       </tr>`).join("");
   } catch (e) {
-    showDebug("Error: " + e.message);
     tb.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="ti ti-alert-circle"></i><br/>Error koneksi ke server.</td></tr>';
   }
 }
 
 function statusLabel(s) {
-  const map = { pending: "Menunggu Review", approved: "Disetujui", rejected: "Ditolak" };
-  return map[s] || s || "Pending";
+  return { pending:"Menunggu Review", approved:"Disetujui", rejected:"Ditolak" }[s] || s || "Pending";
 }
 
-// ─── RATING STARS ──────────────────────────────────────────────────────────
+// ─── RATING STARS ───────────────────────────────────────────────────────────
 function updateStars(val) {
-  const v = parseFloat(val) || 0;
-  const full = Math.round(v);
-  document.getElementById("stars-display").textContent =
-    "★".repeat(Math.min(full, 5)) + "☆".repeat(Math.max(0, 5 - full));
+  const v = Math.min(5, Math.max(0, Math.round(parseFloat(val) || 0)));
+  document.getElementById("stars-display").textContent = "★".repeat(v) + "☆".repeat(5 - v);
 }
 
-// ─── MAPS DETECT ───────────────────────────────────────────────────────────
+// ─── MAPS DETECT ────────────────────────────────────────────────────────────
 function updatePreview(url) {
   const p = document.getElementById("preview");
   p.innerHTML = url
@@ -459,10 +468,10 @@ function extractCoords(url) {
   return null;
 }
 
-// ─── SUBMIT ────────────────────────────────────────────────────────────────
+// ─── SUBMIT WISATA ──────────────────────────────────────────────────────────
 async function submitWisata() {
-  const nama = document.getElementById("f-nama").value.trim();
-  const kategori = document.getElementById("f-kategori").value;
+  const nama      = document.getElementById("f-nama").value.trim();
+  const kategori  = document.getElementById("f-kategori").value;
   const deskripsi = document.getElementById("f-deskripsi").value.trim();
 
   if (!nama || !kategori || !deskripsi) {
@@ -470,7 +479,7 @@ async function submitWisata() {
     return;
   }
 
-  // ✅ Jika id belum ada, coba ambil dulu sebelum submit
+  // Pastikan id ada sebelum submit
   if (!currentUser.id) {
     await loadMitraId();
     if (!currentUser.id) {
@@ -479,30 +488,31 @@ async function submitWisata() {
     }
   }
 
-  const ratingVal = parseFloat(document.getElementById("f-rating").value);
+  const ratingRaw = parseFloat(document.getElementById("f-rating").value);
+  const rating    = (!isNaN(ratingRaw) && ratingRaw >= 0 && ratingRaw <= 5) ? ratingRaw : 0.0;
 
   const body = {
     nama, kategori, deskripsi,
-    category_id: CAT_MAP[kategori] || 1,
-    deskripsi_singkat: document.getElementById("f-singkat").value || null,
-    alamat: document.getElementById("f-alamat").value || null,
-    latitude: parseFloat(document.getElementById("f-lat").value) || null,
-    longitude: parseFloat(document.getElementById("f-lng").value) || null,
-    maps_url: document.getElementById("f-maps").value || null,
-    gambar_url: document.getElementById("f-gambar").value || null,
-    jam_buka: document.getElementById("f-jam-buka").value || null,
-    harga_tiket: document.getElementById("f-harga-tiket").value || "Gratis",
-    lokasi: document.getElementById("f-lokasi").value || null,
-    // ✅ Sertakan rating
-    rating: (!isNaN(ratingVal) && ratingVal >= 0 && ratingVal <= 5) ? ratingVal : 0.0,
-    status: "pending",
-    id_mitra: currentUser.id
+    category_id:       CAT_MAP[kategori] || 1,
+    deskripsi_singkat: document.getElementById("f-singkat").value   || null,
+    alamat:            document.getElementById("f-alamat").value    || null,
+    latitude:          parseFloat(document.getElementById("f-lat").value)  || null,
+    longitude:         parseFloat(document.getElementById("f-lng").value)  || null,
+    maps_url:          document.getElementById("f-maps").value      || null,
+    gambar_url:        document.getElementById("f-gambar").value    || null,
+    jam_buka:          document.getElementById("f-jam-buka").value  || null,
+    harga_tiket:       document.getElementById("f-harga-tiket").value || "Gratis",
+    lokasi:            document.getElementById("f-lokasi").value    || null,
+    rating,
+    status:            "pending",
+    id_mitra:          currentUser.id
   };
 
-  let method = "POST", url = `${SUPABASE_URL}/rest/v1/wisata`;
+  let method = "POST";
+  let url    = `${SUPABASE_URL}/rest/v1/wisata`;
   if (editId) {
     method = "PATCH";
-    url += `?id=eq.${editId}`;
+    url   += `?id=eq.${editId}`;
     delete body.status; // jangan reset status saat edit
   }
 
@@ -519,7 +529,9 @@ async function submitWisata() {
     });
     if (r.ok) {
       showAlert("alert-form",
-        editId ? "Data berhasil diperbarui, menunggu review ulang!" : "Wisata berhasil disubmit, menunggu review admin!",
+        editId
+          ? "Data berhasil diperbarui, menunggu review ulang!"
+          : "Wisata berhasil disubmit, menunggu review admin!",
         "success"
       );
       resetForm();
@@ -533,25 +545,25 @@ async function submitWisata() {
   }
 }
 
-// ─── EDIT ──────────────────────────────────────────────────────────────────
+// ─── EDIT ───────────────────────────────────────────────────────────────────
 function editWisata(w) {
   editId = w.id;
-  document.getElementById("f-nama").value = w.nama || "";
-  document.getElementById("f-kategori").value = w.kategori || "";
-  document.getElementById("f-jam-buka").value = w.jam_buka || "";
-  document.getElementById("f-harga-tiket").value = w.harga_tiket || "";
-  document.getElementById("f-lokasi").value = w.lokasi || "";
-  document.getElementById("f-singkat").value = w.deskripsi_singkat || "";
-  document.getElementById("f-deskripsi").value = w.deskripsi || "";
-  document.getElementById("f-maps").value = w.maps_url || "";
-  document.getElementById("f-lat").value = w.latitude || "";
-  document.getElementById("f-lng").value = w.longitude || "";
-  document.getElementById("f-alamat").value = w.alamat || "";
-  document.getElementById("f-gambar").value = w.gambar_url || "";
-  // ✅ Isi rating saat edit
-  const ratingVal = w.rating != null ? w.rating : 0;
-  document.getElementById("f-rating").value = ratingVal;
-  updateStars(ratingVal);
+  document.getElementById("f-mitra").value      = currentUser.nama || "";
+  document.getElementById("f-nama").value       = w.nama            || "";
+  document.getElementById("f-kategori").value   = w.kategori        || "";
+  document.getElementById("f-jam-buka").value   = w.jam_buka        || "";
+  document.getElementById("f-harga-tiket").value= w.harga_tiket     || "";
+  document.getElementById("f-lokasi").value     = w.lokasi          || "";
+  document.getElementById("f-singkat").value    = w.deskripsi_singkat || "";
+  document.getElementById("f-deskripsi").value  = w.deskripsi       || "";
+  document.getElementById("f-maps").value       = w.maps_url        || "";
+  document.getElementById("f-lat").value        = w.latitude        || "";
+  document.getElementById("f-lng").value        = w.longitude       || "";
+  document.getElementById("f-alamat").value     = w.alamat          || "";
+  document.getElementById("f-gambar").value     = w.gambar_url      || "";
+  const rv = w.rating != null ? w.rating : 0;
+  document.getElementById("f-rating").value = rv;
+  updateStars(rv);
   updatePreview(w.gambar_url);
   document.getElementById("form-title").innerHTML = `<i class="ti ti-pencil"></i> Edit Submission: ${w.nama}`;
   document.getElementById("btn-cancel").style.display = "inline-flex";
@@ -564,6 +576,7 @@ function cancelEdit() { resetForm(); }
 function resetForm() {
   editId = null;
   document.querySelectorAll("#tab-submit input, #tab-submit textarea, #tab-submit select").forEach(el => {
+    if (el.readOnly) return; // jangan hapus field readonly (nama mitra)
     el.tagName === "SELECT" ? el.selectedIndex = 0 : el.value = "";
   });
   document.getElementById("stars-display").textContent = "☆☆☆☆☆";
@@ -573,7 +586,7 @@ function resetForm() {
   hideAlert("alert-form");
 }
 
-// ─── ALERT & DEBUG ─────────────────────────────────────────────────────────
+// ─── ALERT ──────────────────────────────────────────────────────────────────
 function showAlert(id, msg, type) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -584,12 +597,6 @@ function showAlert(id, msg, type) {
 function hideAlert(id) {
   const el = document.getElementById(id);
   if (el) { el.className = "alert"; el.textContent = ""; }
-}
-function showDebug(msg) {
-  const el = document.getElementById("debug-box");
-  if (!el) return;
-  el.textContent = "Debug: " + msg;
-  el.classList.add("show");
 }
 </script>
 </body>
