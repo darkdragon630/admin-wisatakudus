@@ -251,10 +251,10 @@ tr:last-child td{border-bottom:none;}
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>Gambar</th><th>Nama Wisata</th><th>Kategori</th><th>Rating</th><th>Status</th><th>Aksi</th></tr>
+              <tr><th>Gambar</th><th>Nama Wisata</th><th>Kategori</th><th>Rating</th><th>Status</th><th>Alasan</th><th>Aksi</th></tr>
             </thead>
             <tbody id="tbody-riwayat">
-              <tr class="empty-row"><td colspan="6"><i class="ti ti-loader"></i><br/>Memuat data...</td></tr>
+              <tr class="empty-row"><td colspan="7"><i class="ti ti-loader"></i><br/>Memuat data...</td></tr>
             </tbody>
           </table>
         </div>
@@ -366,13 +366,13 @@ async function loadStats() {
 // ─── RIWAYAT ────────────────────────────────────────────────────────────────
 async function loadRiwayat() {
   const tb = document.getElementById("tbody-riwayat");
-  tb.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="ti ti-loader"></i><br/>Memuat data...</td></tr>';
+  tb.innerHTML = '<tr class="empty-row"><td colspan="7"><i class="ti ti-loader"></i><br/>Memuat data...</td></tr>';
 
   // Pastikan id ada
   if (!currentUser.id) {
     const id = await loadMitraId();
     if (!id) {
-      tb.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="ti ti-alert-circle"></i><br/>id_mitra tidak ditemukan. Silakan login ulang.</td></tr>';
+      tb.innerHTML = '<tr class="empty-row"><td colspan="7"><i class="ti ti-alert-circle"></i><br/>id_mitra tidak ditemukan. Silakan login ulang.</td></tr>';
       return;
     }
   }
@@ -385,11 +385,11 @@ async function loadRiwayat() {
     const data = await r.json();
 
     if (!Array.isArray(data)) {
-      tb.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="ti ti-alert-circle"></i><br/>Response tidak valid.</td></tr>';
+      tb.innerHTML = '<tr class="empty-row"><td colspan="7"><i class="ti ti-alert-circle"></i><br/>Response tidak valid.</td></tr>';
       return;
     }
     if (!data.length) {
-      tb.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="ti ti-inbox"></i><br/>Belum ada submission</td></tr>';
+      tb.innerHTML = '<tr class="empty-row"><td colspan="7"><i class="ti ti-inbox"></i><br/>Belum ada submission</td></tr>';
       return;
     }
 
@@ -411,6 +411,9 @@ async function loadRiwayat() {
         </td>
         <td><span class="badge badge-${w.status||'pending'}">${statusLabel(w.status)}</span></td>
         <td>
+          ${w.alasan ? `<span style="color:var(--danger);font-size:0.85rem;">${escHtml(w.alasan)}</span>` : "-"}
+        </td>
+        <td>
           ${(w.status === "pending" || w.status === "rejected")
             ? `<button class="btn secondary sm" onclick='editWisata(${JSON.stringify(w).replace(/'/g,"&#39;")})'>
                 <i class="ti ti-edit"></i> Edit
@@ -419,12 +422,17 @@ async function loadRiwayat() {
         </td>
       </tr>`).join("");
   } catch (e) {
-    tb.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="ti ti-alert-circle"></i><br/>Error koneksi ke server.</td></tr>';
+    tb.innerHTML = '<tr class="empty-row"><td colspan="7"><i class="ti ti-alert-circle"></i><br/>Error koneksi ke server.</td></tr>';
   }
 }
 
 function statusLabel(s) {
   return { pending:"Menunggu Review", approved:"Disetujui", rejected:"Ditolak" }[s] || s || "Pending";
+}
+
+function escHtml(str) {
+  if (!str) return "";
+  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 // ─── RATING STARS ───────────────────────────────────────────────────────────
