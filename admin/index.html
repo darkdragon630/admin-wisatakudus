@@ -274,7 +274,7 @@ async function loadApproval(){
       </td>
     </tr>`).join("");
     
-    // ✅ PASANG EVENT LISTENER SETELAH DATA DIMUAT
+    // Event listener - langsung panggil updateStatus (Android handle confirm)
     tb.addEventListener("click", function(e) {
       const target = e.target.closest("button[data-action]");
       if (!target) return;
@@ -289,8 +289,9 @@ async function loadApproval(){
 }
 
 async function updateStatus(id,status,btnEl){
-  const label=status==="approved"?"menyetujui":"menolak";
-  if(!confirm(`Yakin ingin ${label} data ini?`))return;
+  // ✅ HAPUS confirm JavaScript - biarkan Android WebChromeClient yang menangani
+  // if(!confirm(`Yakin ingin ${label} data ini?`))return;
+  
   // Disable tombol saat proses
   const row=btnEl.closest("tr");
   row.querySelectorAll("button").forEach(b=>{b.disabled=true;b.style.opacity="0.6";});
@@ -302,7 +303,6 @@ async function updateStatus(id,status,btnEl){
     });
     if(r.ok){
       showApprovalAlert(status==="approved"?"Wisata berhasil disetujui dan akan tampil di publik!":"Wisata ditolak.",status==="approved"?"success":"error");
-      // Hapus baris langsung dari DOM untuk respons cepat
       row.style.transition="opacity 0.3s";
       row.style.opacity="0";
       setTimeout(()=>{loadApproval();},400);
@@ -347,8 +347,7 @@ function escHtml(str){
   return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
-// ===== EVENT DELEGATION DI SINI (TANPA DOMContentLoaded) =====
-// Hapus event listener dari DOMContentLoaded karena sudah dipasang di loadApproval()
+// ===== DOMContentLoaded hanya untuk testConnection =====
 document.addEventListener("DOMContentLoaded", function() {
     testConnection();
 });
